@@ -290,43 +290,41 @@ public class Parser{
             addIdentifier(trimedName,temp);
             if(i == line.length()){
                 throw new typeException("Missing ')' in function declaration");
-                // System.out.println("Missing ')' in function declaration");
             }
-            //else{
-                while(line.charAt(i) != ')'){
-                    arguments += line.charAt(i);
-                    i++;
-                    if(i == line.length()) break;
-                }
-                if(i == line.length()){
-                    throw new typeException("Missing '{'");
-                    // System.out.println("Missing '{'");
-                }
-               // else{
-                    System.out.println("Found ')', arguments are "+ arguments +" and the function declaration is complete");
-                    i++;
-                    if(i == line.length())
-                     throw new typeException("Reached end of string, '{' '}'  not found");
-                    while(line.charAt(i) != '{'){
-                        inBetweens += line.charAt(i);
-                        i++;
-                        if(i == line.length() ) break;
-                    }
-                    if(i == line.length()){
-                        throw new typeException("Error, Not found '}' ");
-                        // System.out.println("Error, Not found '}' ");
-                    }
-                    //else{
-                        System.out.println("The space for return types contains "+inBetweens);
-                        if( line.charAt(line.length() - 1 ) != '}'){
-                            System.out.println("Error, missing '}'");
-                        }
-                        else{
-                            System.out.println("Function parsed successfully!");
-                        }
-                    // }
-                //}
-           // }
+            
+            while(line.charAt(i) != ')'){
+                arguments += line.charAt(i);
+                i++;
+                if(i == line.length()) break;
+            }
+            if(i == line.length()){
+                throw new typeException("Missing '{'");
+            }
+           
+            System.out.println("Found ')', arguments are "+ arguments +" and the function declaration is complete");
+            i++;
+            if(i == line.length())
+             throw new typeException("Reached end of string, '{' '}'  not found");
+            while(line.charAt(i) != '{'){
+                inBetweens += line.charAt(i);
+                i++;
+                if(i == line.length() ) break;
+            }
+            if(i == line.length()){
+                throw new typeException("Error, Not found '}' ");
+               
+            }
+            
+            System.out.println("The space for return types contains "+inBetweens);
+            if( line.charAt(line.length() - 1 ) != '}'){
+                System.out.println("Error, missing '}'");
+            }
+            else{
+                System.out.println("Function parsed successfully!");
+            }
+                
+            
+          
         }
         //after parsing, figuring out arguments and return types area, we parse to find the specifics
         //parsing the arguments and separating them into identifier and data type
@@ -340,6 +338,7 @@ public class Parser{
                     throw new typeException("Error, arguments are not entered properly, please enter variableName: dataType");
                 }
                 else{
+                    //check if the data type is a primitive or an array
                     String trimedType=argumentParts[1].trim();
                     if(isPrimitiveType(trimedType)==true){
                         DataType tempType = new DataType(trimedType,DataType.PRIMITIVE);
@@ -372,85 +371,84 @@ public class Parser{
             j = 2;
             if(j == inBetweens.length() ){
                 throw new typeException("Missing return arguments");
-                // System.out.println("Missing return arguments");
             }
-            //else{
-                String returnArgs = "";
-                while( inBetweens.charAt(j) != '('){
-                    j++;
-                    if(j == inBetweens.length() ){
-                        t2 = true;
-                        break;
-                    }    
+        
+            String returnArgs = "";
+            while( inBetweens.charAt(j) != '('){
+                j++;
+                if(j == inBetweens.length() ){
+                    t2 = true;
+                    break;
+                }    
+            }
+            if(t2){
+                System.out.println("There are no brackets in return space");
+                j = 2;
+                while(j != inBetweens.length() ){
+                    returnArgs += inBetweens.charAt(j++);
                 }
-                if(t2){
-                    System.out.println("There are no brackets in return space");
-                    j = 2;
-                    while(j != inBetweens.length() ){
-                        returnArgs += inBetweens.charAt(j++);
-                    }
-                    System.out.println("Return arguments are "+returnArgs);
-                    returnArgs = returnArgs.trim();
-                    String returnArgsList[] = returnArgs.split(":");
-                    String trimedType = returnArgList[1].trim();
-                    if(isPrimitiveType(trimedType)==true){
-                        DataType tempType=new DataType(trimedType,DataType.PRIMITIVE);
-                        String name= trimedType;
-                        addIdentifier(name,tempType,enclosingFunc);
-                    }
-                    else if(trimedType.charAt(0)=='['){
-                    	String trimedIdentifierName = returnArgList[0].trim();
-                    	checkArray(trimedIdentifierName,trimedType);
-                    }
-                    else{
-                        throw new typeException("The return type is invalid or has not been defined yet");
-                    }
+                System.out.println("Return arguments are "+returnArgs);
+                returnArgs = returnArgs.trim();
+                String returnArgsList[] = returnArgs.split(":");
+                String trimedType = returnArgsList[1].trim();
+                if(isPrimitiveType(trimedType)==true){
+                    DataType tempType=new DataType(trimedType,DataType.PRIMITIVE);
+                    String name= trimedType;
+                    addIdentifier(name,tempType,enclosingFunc);
+                }
+                else if(trimedType.charAt(0)=='['){
+                	String trimedIdentifierName = returnArgsList[0].trim();
+                	checkArray(trimedIdentifierName,trimedType);
                 }
                 else{
-                    j++;
-                    while( inBetweens.charAt(j) != ')'){
-                        returnArgs += inBetweens.charAt(j);
-                        j++;
-                        if(j ==inBetweens.length() ) break;
-                    }
-                    if(j==inBetweens.length() ){
-                        throw new typeException("Missing ')' for return tuple");
-                        // System.out.println("Missing ')' for return tuple");
-                    }
-                    //else{
-                        System.out.println("Return arguments are "+returnArgs);
-                        if(returnArgs.trim().length()!=0){
-                            String[] commaSeparated = returnArgs.split(",");
-                            if(commaSeparated.length == 1 ){
-                                throw new typeException("cannot create a single-element tuple with an element label");
-                            }
-                            for(String x : commaSeparated){
-                                String[] returnArgList = x.split(":");
-                                if(returnArgList.length%2 != 0 || returnArgList.length==0){
-                                    throw new typeException("There is an error in return arguments, please enter variableName: dataType");
-                                    //System.out.println("There is an error in return arguments, please enter variableName: dataType");
-                                }
-                               // else{
-                                    String trimedType=returnArgList[1].trim();
-                                    if(isPrimitiveType(trimedType)==true){
-                                        DataType tempType=new DataType(trimedType,DataType.PRIMITIVE);
-                                        String name= trimedType;
-                                        addIdentifier(name,tempType,enclosingFunc);
-                                    }
-                                    else if(trimedType.charAt(0)=='['){
-				                    	String trimedIdentifierName=returnArgList[0].trim();
-				                    	checkArray(trimedIdentifierName,trimedType);
-				                    }
-                                    else{
-                                        throw new typeException("The return type is invalid or has not been defined yet");
-                                    }
-                              //  }
-                            }
-                       // }
-                        // return arguments are stored in returnArgList
-                    }
+                    throw new typeException("The return type is invalid or has not been defined yet");
                 }
-            //}
+            }
+            else{
+                j++;
+                while( inBetweens.charAt(j) != ')'){
+                    returnArgs += inBetweens.charAt(j);
+                    j++;
+                    if(j ==inBetweens.length() ) break;
+                }
+                if(j==inBetweens.length() ){
+                    throw new typeException("Missing ')' for return tuple");
+                    
+                }
+               
+                System.out.println("Return arguments are "+returnArgs);
+                if(returnArgs.trim().length()!=0){
+                    String[] commaSeparated = returnArgs.split(",");
+                    if(commaSeparated.length == 1 ){
+                        throw new typeException("cannot create a single-element tuple with an element label");
+                    }
+                    for(String x : commaSeparated){
+                        String[] returnArgList = x.split(":");
+                        if(returnArgList.length%2 != 0 || returnArgList.length==0){
+                            throw new typeException("There is an error in return arguments, please enter variableName: dataType");
+                            
+                        }
+                       
+                        String trimedType=returnArgList[1].trim();
+                        if(isPrimitiveType(trimedType)==true){
+                            DataType tempType=new DataType(trimedType,DataType.PRIMITIVE);
+                            String name= trimedType;
+                            addIdentifier(name,tempType,enclosingFunc);
+                        }
+                        else if(trimedType.charAt(0)=='['){
+	                    	String trimedIdentifierName=returnArgList[0].trim();
+	                    	checkArray(trimedIdentifierName,trimedType);
+	                    }
+                        else{
+                            throw new typeException("The return type is invalid or has not been defined yet");
+                        }
+                      
+                    }
+                   
+                    // return arguments are stored in returnArgList
+                }
+            }
+            
 
         }
     }
@@ -466,18 +464,20 @@ public class Parser{
         }
     }
     static void inputPrompt(){
-        System.out.println("This program currently supports primitives, structures and functions");
-        System.out.println("");
-        System.out.println("Every DataType has an Identifier attached to it, \nfunc functioName(argumentName: argumentType) -> (returnVariableName: returnVariableType){} is accepted\nWhereas\nfunc functioName(argumentType) -> (returnVariableType){} is not accepted\nAlso, if a function returns one data, it should not be put in braces, the original language accepts (Int) and rejects (a:Int)");
+        System.out.println("This program currently supports primitives, arrays, structures and functions");
+        System.out.println();
+        System.out.println("Every DataType has an Identifier attached to it, \nfunc functioName(argumentName: argumentType) -> (returnVariableName: returnVariableType){} is accepted\nWhereas\nfunc functioName(argumentType) -> (returnVariableType){} is not accepted\nAlso, if a function returns one variable, it should not be put in parantheses and should be kept after the -> as variableName: variableType\nThe original language accepts (Int) and rejects (a:Int), we reject both.\n");
         System.out.println("Enter the input and press EOF(^D) to exit:");
     } 
     static void getInput(){
+        //take input from user
         Scanner sc = new Scanner(System.in);
         while(sc.hasNextLine()){
             input+=sc.nextLine()+"\n";
         }
     }
     static void tokenize(){
+        //Tokenize the input and strip them of trailing whitespaces and then pass into respective parsers
         String trimedInput=input.trim();
         String lines[]=trimedInput.split("\n");
         int dataClass=0;
