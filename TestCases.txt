@@ -1,0 +1,43 @@
+TESTCASE
+var a: Int
+var b: Int
+var c: String
+var d: Float
+struct s{
+	var x: [Int]
+	var y: String
+}
+struct t{
+	var xx: String
+	var yy: [Int]
+}
+TESTCASE
+var a: [[Int]]
+b,c,d: [[Float]]
+struct s{
+	var p:String
+	var e:[[Float]]
+}
+func f1(arg1:s,arg2:[s],arg3:Float)->rarg1:String{}
+func f2(arg6:s,arg5:[s],arg4:Float)->rarg2:String{}
+func f3(arg7:[s],arg8:Float)->rarg3:String{}
+func f4(arg9:[s],arg10:s,arg11:[[s]])->rarg:String{}
+TESTCASE
+struct s{
+	var p: String
+	var q: Float
+}
+struct t{
+	var a: String
+	var b: Float
+}
+struct r{
+	var m: Float
+	var n: String
+}
+func f1(arg1:s)->(a1:String,b1:Int){}
+func f2(arg2:t)->(a2:String,b2:Int){}
+TESTCASE
+func f(){}
+func g(){}
+END

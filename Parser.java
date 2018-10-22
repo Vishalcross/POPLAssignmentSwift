@@ -1,12 +1,13 @@
 /***********************************************************************************************************
-* 
-* Important point, here the structue reference within the struct declaration will follow the same behavior as 
+*
+* Important point, here the structue reference within the struct declaration will follow the same behavior as
 * an ordinary primitive var identifier:dataType
 * TO DO
 * Remove the else if for handling exceptions
 * Replace the printlns with exceptions
 *************************************************************************************************************/
 import java.util.*;
+import java.io.*;
 class typeException extends RuntimeException{
     public typeException(){
         super();
@@ -18,7 +19,7 @@ class typeException extends RuntimeException{
 class DataType{
     final static int PRIMITIVE=0;
     final static int STRUCTURE=1;
-    final static int FUNCTION=2; 
+    final static int FUNCTION=2;
     final static int ARRAY=3;
     final static int ERROR=-1;
     final static String PRIMITIVE_TOKEN="var";
@@ -29,7 +30,7 @@ class DataType{
     DataType(String name,int dataClass){
         this.name=name;
         this.dataClass=dataClass;
-    }    
+    }
 
 }
 class Identifier{
@@ -62,7 +63,7 @@ class ArrayProperties{
 }
 
 public class Parser{
-    
+
     static String input="";
     static String enclosingStruct="";
     static String enclosingFunc="";
@@ -112,10 +113,10 @@ public class Parser{
         if(count!=0){
             throw new typeException("Bracket Mismatch");
         }
-        
+
         if(isPrimitiveType(typeString)==true){
             typeString+=" array:"+maxCount;
-            // System.out.println("The typestring for "+identifierString+" is "+typeString);
+
             ArrayProperties temp=new ArrayProperties(typeString,maxCount);
             arrayMap.put(identifierString,temp);
             DataType tempType=new DataType(typeString,DataType.ARRAY);
@@ -135,11 +136,11 @@ public class Parser{
             }
         }
         else{
-            throw new typeException("The data type is not defined for the array");
+            throw new typeException("The data type is not defined for the array xxx"+typeString+"xxx");
         }
-    
+
     }
-    
+
     static String isArray(String arrayString){
          String typeString="";
         int count=0,maxCount=-1;
@@ -166,7 +167,7 @@ public class Parser{
         if(count!=0){
             throw new typeException("Bracket Mismatch");
         }
-        
+
         if(isPrimitiveType(typeString)==true){
             return typeString;
         }
@@ -174,7 +175,7 @@ public class Parser{
             throw new typeException("The data type is not defined for the array");
         }
     }
-    
+
     static void addIdentifier(String name,DataType type){
         if(insideStruct==true){ //Initialising the outermost struct
             nonPrimitiveMap.put(name,new ArrayList<String>());//Defining an empty arrayList for struct
@@ -187,15 +188,15 @@ public class Parser{
         }
         identifierTable.put(name,new Identifier(name,type));
     }
-    
+
     static void addIdentifier(String name,DataType type,String nonPrimitiveIdentifier){
         if(insideStruct==true || insideFunc==true){
             nonPrimitiveMap.get(nonPrimitiveIdentifier).add(type.name);
         }
     }
-    
+
     static void addReturnType(String name,DataType type,String nonPrimitiveIdentifier){
-        System.out.println("199 *(&(*&)* "+returnMap.size());
+
         returnMap.get(nonPrimitiveIdentifier).add(type.name);
     }
     static void parsePrimitive(String[] parts){
@@ -272,12 +273,12 @@ public class Parser{
             else{
                 throw new typeException(subParts[1]+" is not a valid type");
             }
-        } 
+        }
         else{
             throw new typeException("The synatx is incorrect for primitive type!");
         }
     }
-    
+
     static void parseStruct(String[] parts){
         // This discards the input after the start brace on the same line
         if(insideStruct==true){
@@ -302,7 +303,7 @@ public class Parser{
             throw new typeException("The syntax is incorrect for a structures");
         }
     }
-    
+
     static void parseFunc(String line){
         if(insideFunc==true){
             throw new typeException("Function definition inside another is not allowed");
@@ -325,9 +326,9 @@ public class Parser{
         }
         if(i == 5 || i == line.length()){
           throw new typeException("Definition of function is incomplete");
-        } 
+        }
         else{
-            // System.out.println("Found '(' and the function is named "+functionName);
+
             i++;
             String trimedName=functionName.trim();
             enclosingFunc=trimedName;
@@ -336,7 +337,7 @@ public class Parser{
             if(i == line.length()){
                 throw new typeException("Missing ')' in function declaration");
             }
-            
+
             while(line.charAt(i) != ')'){
                 arguments += line.charAt(i);
                 i++;
@@ -345,8 +346,8 @@ public class Parser{
             if(i == line.length()){
                 throw new typeException("Missing '{'");
             }
-           
-            // System.out.println("Found ')', arguments are "+ arguments +" and the function declaration is complete");
+
+
             i++;
             if(i == line.length())
              throw new typeException("Reached end of string, '{' '}'  not found");
@@ -357,19 +358,16 @@ public class Parser{
             }
             if(i == line.length()){
                 throw new typeException("Error, Not found '}' ");
-               
+
             }
-            
-            // System.out.println("The space for return types contains "+inBetweens);
+
+
             if( line.charAt(line.length() - 1 ) != '}'){
-                // System.out.println("Error, missing '}'");
+                throw new typeException("Error, no closing '}' found");
             }
-            else{
-                // System.out.println("Function parsed successfully!");
-            }
-                
-            
-          
+
+
+
         }
         //after parsing, figuring out arguments and return types area, we parse to find the specifics
         //parsing the arguments and separating them into identifier and data type
@@ -400,39 +398,39 @@ public class Parser{
                 }
             }
         }
-        
-        
+
+
         inBetweens = inBetweens.trim();
         int j = 0;
         if(inBetweens.length() == 0){ //parsing for return arguments
-            System.out.println("408 No return type specified");
+
         }
         else{
             boolean  t2 = false;
             insideReturn=true;
             if(inBetweens.charAt(0) == '-' && inBetweens.charAt(1) == '>'){
-                // System.out.println("Return type -> found");
+
             }
             j = 2;
             if(j == inBetweens.length() ){
                 throw new typeException("Missing return arguments");
             }
-        
+
             String returnArgs = "";
             while( inBetweens.charAt(j) != '('){
                 j++;
                 if(j == inBetweens.length() ){
                     t2 = true;
                     break;
-                }    
+                }
             }
             if(t2){
-                // System.out.println("There are no brackets in return space");
+
                 j = 2;
                 while(j != inBetweens.length() ){
                     returnArgs += inBetweens.charAt(j++);
                 }
-                // System.out.println("Return arguments are "+returnArgs);
+
                 returnArgs = returnArgs.trim();
                 String returnArgsList[] = returnArgs.split(":");
                 String trimedType = returnArgsList[1].trim();
@@ -458,10 +456,10 @@ public class Parser{
                 }
                 if(j==inBetweens.length() ){
                     throw new typeException("Missing ')' for return tuple");
-                    
+
                 }
-               
-                // System.out.println("Return arguments are "+returnArgs);
+
+
                 if(returnArgs.trim().length()!=0){
                     String[] commaSeparated = returnArgs.split(",");
                     if(commaSeparated.length == 1 ){
@@ -471,9 +469,9 @@ public class Parser{
                         String[] returnArgList = x.split(":");
                         if(returnArgList.length%2 != 0 || returnArgList.length==0){
                             throw new typeException("There is an error in return arguments, please enter variableName: dataType");
-                            
+
                         }
-                       
+
                         String trimedType=returnArgList[1].trim();
                         if(isPrimitiveType(trimedType)==true){
                             DataType tempType=new DataType(trimedType,DataType.PRIMITIVE);
@@ -487,9 +485,9 @@ public class Parser{
                         else{
                             throw new typeException("The return type is invalid or has not been defined yet");
                         }
-                      
+
                     }
-                   
+
                     // return arguments are stored in returnArgList
                 }
             }
@@ -497,8 +495,8 @@ public class Parser{
         insideReturn=false;
         insideFunc=false;
     }
-    
-    
+
+
     static boolean isPrimitiveType(String type){
         //Check if the dataType lies in the set of primitive types
         if(typeTable.containsKey(type)==true){
@@ -513,12 +511,84 @@ public class Parser{
         System.out.println();
         System.out.println("Every DataType has an Identifier attached to it, \nfunc functioName(argumentName: argumentType) -> (returnVariableName: returnVariableType){} is accepted\nWhereas\nfunc functioName(argumentType) -> (returnVariableType){} is not accepted\nAlso, if a function returns one variable, it should not be put in parantheses and should be kept after the -> as variableName: variableType\nThe original language accepts (Int) and rejects (a:Int), we reject both.\n");
         System.out.println("Enter the input and press EOF(^D) to exit:");
-    } 
+    }
+    static void init(){
+         input="";
+         enclosingStruct="";
+          enclosingFunc="";
+         identifierTable = new HashMap<>();
+         typeTable = new HashMap<>();
+         nonPrimitiveMap = new HashMap<>();
+        functionArgumentsMap = new HashMap<>();
+        functionReturnsMap = new HashMap<>();
+        arrayMap = new HashMap<>();
+        returnMap = new HashMap<>();
+        structures = new HashSet<>();
+        insideStruct=false;
+        insideFunc = false;
+        insideReturn = false;
+        initTypes();
+    }
     static void getInput(){
         //take input from user
-        Scanner sc = new Scanner(System.in);
-        while(sc.hasNextLine()){
-            input+=sc.nextLine()+"\n";
+        // Scanner sc = new Scanner(System.in);
+        // while(sc.hasNextLine()){
+        //     input+=sc.nextLine()+"\n";
+        // }
+        FileInputStream f = null;
+        System.out.println(System.getProperty("user.dir")+"/TestCases.txt");
+        try{
+            f = new FileInputStream(System.getProperty("user.dir")+"/TestCases.txt");
+            DataInputStream d = new DataInputStream(f);
+            BufferedReader bf = new BufferedReader(new InputStreamReader(d));
+            try {
+                String s = bf.readLine();
+                int count = 1;
+                try {
+                    PrintWriter pw = new PrintWriter(System.getProperty("user.dir")+"/Output.txt");
+                    while(count <= 4){
+                        String output = "";
+                        if(count != 4){
+                            s = bf.readLine();
+                            while(s.equals("TESTCASE") == false){
+                                if(s.equals("TESTCASE") == false)
+                                    input += s + "\n";
+                                s = bf.readLine();
+                            }
+                        }
+                        else{
+                            s = bf.readLine();
+                            while(s.equals("END") == false){
+                                if(s.equals("END") == false)
+                                    input += s + "\n";
+                                s = bf.readLine();
+                            }
+                        }
+                        System.out.println(input);
+                        Equivalences equivalenceTable = new Equivalences();
+                        tokenize(equivalenceTable);
+                        equivalenceTable.populate();
+                        output += equivalenceTable.output;
+                        System.out.println(output);
+                        pw.println("TESTCASE "+count);
+                        pw.println(output);
+                        pw.println();
+                        count++;
+                        init();
+                        input = "";
+                    }
+                    pw.close();
+                }
+                catch (FileNotFoundException ex) {
+                    System.err.println(ex);
+                }
+            }
+            catch (IOException ex) {
+                System.err.println("Line Not Found");
+            }
+        }
+        catch(FileNotFoundException ex){
+            System.err.println("File Not Found");
         }
     }
     static void tokenize(Equivalences equivalenceTable){
@@ -536,7 +606,7 @@ public class Parser{
                 continue;
             }
             String[] parts=trimedLine.split("\\s+");
-            
+
             dataClass=Identifier.identify(parts[0]);
             if(dataClass==DataType.PRIMITIVE){
                 parsePrimitive(parts);
@@ -559,9 +629,6 @@ public class Parser{
         initTypes();
         inputPrompt();
         getInput();
-        Equivalences equivalenceTable = new Equivalences();
-        tokenize(equivalenceTable);
-        equivalenceTable.populate();
     }
 
 }
@@ -573,12 +640,14 @@ class Equivalences{
     ArrayList<String> arrays = new ArrayList<>();
     ArrayList<String> nameEquivalences = new ArrayList<>();
     ArrayList<String> structuralEquivalence = new ArrayList<>();
-    HashMap<String,ArrayList<String>> internalNameEquivalentMap=new HashMap<>(); 
+    HashMap<String,ArrayList<String>> internalNameEquivalentMap=new HashMap<>();
     HashMap<String,ArrayList<String>> nameEquivalentPrimitive=new HashMap<>();
     HashMap<String,ArrayList<String>> nameEquivalentArray=new HashMap<>();
     boolean[][] truths=null;
+    String output = "";
 
-    void nameEquivalence(ArrayList<String> identifiers,int klass){
+    void nameEquivalence(ArrayList<String> identifiers,int klass ){
+        // String output = "";
         if(klass==DataType.PRIMITIVE){
             for(String key:identifiers){
                 String dataType=Parser.identifierTable.get(key).dataType.name;
@@ -592,13 +661,17 @@ class Equivalences{
                 }
             }
 
-            System.out.println("@@@@@@@@@@@@@@@@@@ PRIMITIVE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            // System.out.println("@@@@@@@@@@@@@@@@@@ PRIMITIVE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            output += "@@@@@@@@@@@@@@@@@@ PRIMITIVE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
             for(String key:nameEquivalentPrimitive.keySet()){
-                System.out.print(key + ": ");
+                // System.out.print(key + ": ");
+                output += key + ": ";
                 for(String identifier:nameEquivalentPrimitive.get(key)){
-                    System.out.print(identifier+" ");
+                    // System.out.print(identifier+" ");
+                    output += identifier+" ";
                 }
-                System.out.println("");
+                // System.out.println("");
+                output += "\n";
             }
         }
         else if(klass==DataType.ARRAY){
@@ -615,45 +688,40 @@ class Equivalences{
 
             }
 
-            System.out.println("@@@@@@@@@@@@@@@@@@ ARRAY @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            // System.out.println("@@@@@@@@@@@@@@@@@@ ARRAY @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            output += "@@@@@@@@@@@@@@@@@@ ARRAY @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
             for(String key:nameEquivalentArray.keySet()){
-                System.out.print(key + ": ");
+                // System.out.print(key + ": ");
+                output += key + ": ";
                 for(String identifier:nameEquivalentArray.get(key)){
-                    System.out.print(identifier+" ");
+                    // System.out.print(identifier+" ");
+                    output += identifier+" ";
                 }
-                System.out.println("");
+                // System.out.println("");
+                output += "\n";
             }
 
         }
         else{
             throw new typeException("Invalid type for nameEquivalence");
         }
-
     }
     boolean compare(String struct1,String struct2,boolean[][] truths){
         ArrayList<String> set1 = Parser.nonPrimitiveMap.get(struct1);
         ArrayList<String> set2 = Parser.nonPrimitiveMap.get(struct2);
 
         if(set1.size()!=set2.size()){
-            System.out.println("637: Lines differ");
             return false;
         }
 
         for(int i=0;i<set1.size();i++){
             if(Parser.structures.contains(set1.get(i))==true && Parser.structures.contains(set2.get(i))==true){
-                System.out.println("643: Index for first"+structures.indexOf(set1.get(i)));
-                System.out.println("644: Index for second"+structures.indexOf(set2.get(i)));
-                System.out.print("Truth value:");
-                System.out.println(truths[0][0]);
                  if(truths[structures.indexOf(set1.get(i))][structures.indexOf(set2.get(i))]==false){
-                    System.out.println("Structs differ");
                     return false;
                  }
             }
             else if(Parser.structures.contains(set1.get(i))==false && Parser.structures.contains(set2.get(i))==false){
                 if(set1.get(i).equals(set2.get(i))==false){
-                    System.out.println("Atomic differ");
-                    System.out.println(set1.get(i)+" "+set2.get(i));
                     return false;
                 }
             }
@@ -690,24 +758,17 @@ class Equivalences{
         return true;
     }
     void structuralEquivalence(ArrayList<String> identifiers,int klass){
-        
+
         if(klass==DataType.STRUCTURE){
             truths=new boolean[identifiers.size()][identifiers.size()];
             for(int i=0;i<identifiers.size();i++){
                 for(int j=0;j<identifiers.size();j++){
                     truths[i][j]=true;
                 }
-            } 
+            }
             boolean updated=true;
 
-            System.out.println("702 Truths table");
-            for(int i=0;i<structures.size();i++){
-                for(int j=0;j<structures.size();j++){
-                    System.out.print(truths[i][j]);
-                    System.out.print(" ");
-                }
-                System.out.println();
-            }
+
             while(updated==true){
                 updated=false;
                 for(int i=0;i<identifiers.size()-1;i++){
@@ -721,14 +782,8 @@ class Equivalences{
                 }
             }
 
-            System.out.println("723 Truths table");
-            for(int i=0;i<structures.size();i++){
-                for(int j=0;j<structures.size();j++){
-                    System.out.print(truths[i][j]);
-                    System.out.print(" ");
-                }
-                System.out.println();
-            }
+
+
 
             HashMap<String,String> equivalences = new HashMap<>();
             HashMap<String,Boolean> printed = new HashMap<>();
@@ -747,31 +802,28 @@ class Equivalences{
                 }
             }
 
-            System.out.println("@@@@@@@@@@@@@@@@@@ STRUCTURE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            // System.out.println("@@@@@@@@@@@@@@@@@@ STRUCTURE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            output += "@@@@@@@@@@@@@@@@@@ STRUCTURE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
             for(String i: equivalences.keySet()){
                 if(printed.get(i) == false){
-                    System.out.print(i+": ");
+                    // System.out.print(i+": ");
+                    output += i+": ";
                     for(String j: equivalences.keySet()){
                         if(equivalences.get(j) == i){
                             printed.put(j,true);
-                            System.out.print(j+" ");
+                            // System.out.print(j+" ");
+                            output += j+" ";
                         }
                     }
-                    System.out.println();
+                    // System.out.println();
+                    output += "\n";
                 }
             }
         }
         else if(klass==DataType.FUNCTION){
             boolean[][] funcTruths=new boolean[identifiers.size()][identifiers.size()];
-            
-            System.out.println("749 Truths table");
-            for(int i=0;i<structures.size();i++){
-                for(int j=0;j<structures.size();j++){
-                    System.out.print(truths[i][j]);
-                    System.out.print(" ");
-                }
-                System.out.println();
-            }
+
+
             for(int i=0;i<funcTruths.length;i++){
                 for(int j=0;j<funcTruths.length;j++){
                     funcTruths[i][j]=true;
@@ -785,20 +837,19 @@ class Equivalences{
                     for(int j=i+1;j<funcTruths.length;j++){
                         if(funcTruths[i][j]==true){
                             //Check for returns
-                            System.out.print("757 check for size:");
-                            System.out.println(Parser.returnMap.get(identifiers.get(i)).size());
-                            if( (Parser.returnMap.get(identifiers.get(i)).size()!=0 && Parser.returnMap.get(identifiers.get(j)).size()!=0)){ 
+
+                            if( (Parser.returnMap.get(identifiers.get(i)).size()!=0 && Parser.returnMap.get(identifiers.get(j)).size()!=0)){
                                 if(compare(identifiers.get(i),identifiers.get(j),truths)==false ){
                                     funcTruths[i][j]=false;
                                     funcTruths[j][i]=false;
                                     updated=true;
-                                     System.out.println("********Arguments Differ");
+
                                 }
                                 else if(comapareReturns(identifiers.get(i),identifiers.get(j),truths)==false){
                                     funcTruths[i][j]=false;
                                     funcTruths[j][i]=false;
                                     updated=true;
-                                     System.out.println("*********Returns Differ");
+
                                 }
                             }
                             else if(Parser.returnMap.get(identifiers.get(i)).size()==0 && Parser.returnMap.get(identifiers.get(j)).size()==0){
@@ -806,7 +857,7 @@ class Equivalences{
                                     funcTruths[i][j]=false;
                                     funcTruths[j][i]=false;
                                     updated=true;
-                                    System.out.println("/.//././.Arguments Differ");
+
                                 }
                             }
                             else{
@@ -844,14 +895,18 @@ class Equivalences{
                 temp.add(identifiers.get(identifiers.size()-1));
                 print.put(identifiers.get(identifiers.size()-1),temp);
             }
-            
-            System.out.println("@@@@@@@@@@@@@@@@@@ FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
+            // System.out.println("@@@@@@@@@@@@@@@@@@ FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            output += "@@@@@@@@@@@@@@@@@@ FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
             for(String key:print.keySet()){
-                System.out.print(key+": ");
+                // System.out.print(key+": ");
+                output += key + ": ";
                 for(String elem:print.get(key)){
-                    System.out.print(elem+" ");
+                    // System.out.print(elem+" ");
+                    output += elem+" ";
                 }
-                System.out.println();
+                // System.out.println();
+                output += "\n";
             }
         }
         else{
@@ -897,13 +952,17 @@ class Equivalences{
             throw new typeException("Invalid type");
         }
 
-        System.out.println("@@@@@@@@@@@@@@@@@@ INTERNAL NAME EQ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        // System.out.println("@@@@@@@@@@@@@@@@@@ INTERNAL NAME EQ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        output += "@@@@@@@@@@@@@@@@@@ INTERNAL NAME EQ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
         for(String key: internalNameEquivalentMap.keySet()){
-            System.out.print(key+" ");
+            // System.out.print(key+" ");
+            output += key+" ";
             for(String identifier:internalNameEquivalentMap.get(key)){
-                System.out.print(identifier+" ");
+                // System.out.print(identifier+" ");
+                output += identifier + " ";
             }
-            System.out.println("");
+            // System.out.println("");
+            output += "\n";
         }
     }
 
