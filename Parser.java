@@ -55,6 +55,10 @@ class ArrayProperties{
         this.type=type;
         this.numberOfDimensions=numberOfDimensions;
     }
+
+    public String toString(){
+        return type+" "+numberOfDimensions;
+    }
 }
 
 public class Parser{
@@ -107,30 +111,62 @@ public class Parser{
         if(count!=0){
             throw new typeException("Bracket Mismatch");
         }
+        
+        if(isPrimitiveType(typeString)==true){
+            typeString+=" array";
+            ArrayProperties temp=new ArrayProperties(typeString,maxCount);
+            arrayMap.put(identifierString,temp);
+            DataType tempType=new DataType(typeString,DataType.ARRAY);
+            if(insideStruct==false){
+                addIdentifier(identifierString,tempType);
+            }
+            else if(insideFunc==true){
+                addIdentifier(identifierString,tempType,enclosingFunc);
+            }
+            else if(insideStruct){
+                addIdentifier(identifierString,tempType,enclosingStruct);
+            }
+        }
         else{
-            if(isPrimitiveType(typeString)==true){
-                typeString+=" array";
-                ArrayProperties temp=new ArrayProperties(typeString,maxCount);
-                arrayMap.put(identifierString,temp);
-                DataType tempType=new DataType(typeString,DataType.ARRAY);
-                if(insideStruct==false){
-                    addIdentifier(identifierString,tempType);
+            throw new typeException("The data type is not defined for the array");
+        }
+    
+    }
+    
+    static String isArray(String arrayString){
+         String typeString="";
+        int count=0,maxCount=-1;
+        for(int i=0;i<arrayString.length();i++){
+            if(arrayString.charAt(i)=='['){
+                count++;
+                if(maxCount<count){
+                    maxCount=count;
                 }
-                else if(insideFunc==true){
-                	addIdentifier(identifierString,tempType,enclosingFunc);
+                else if(count<=maxCount){
+                    throw new typeException("Start closing brackets only when all open brackets have finished");
                 }
-                else if(insideStruct){
-                    addIdentifier(identifierString,tempType,enclosingStruct);
+            }
+            else if(arrayString.charAt(i)==']'){
+                count--;
+                if(count<0){
+                    throw new typeException("Bracket Mismatch");
                 }
             }
             else{
-                throw new typeException("The data type is not defined for the array");
+                typeString+=arrayString.substring(i,i+1);
             }
         }
+        if(count!=0){
+            throw new typeException("Bracket Mismatch");
+        }
         
+        if(isPrimitiveType(typeString)==true){
+            return typeString;
+        }
+        else{
+            throw new typeException("The data type is not defined for the array");
+        }
     }
-    
-    
     
     static void addIdentifier(String name,DataType type){
         if(insideStruct==true){ //Initialising the outermost struct
@@ -346,8 +382,8 @@ public class Parser{
                         addIdentifier(name,tempType,enclosingFunc);
                     }
                     else if(trimedType.charAt(0)=='['){
-                    	String trimedIdentifierName=argumentParts[0].trim();
-                    	checkArray(trimedIdentifierName,trimedType);
+                        String trimedIdentifierName=argumentParts[0].trim();
+                        checkArray(trimedIdentifierName,trimedType);
                     }
                     else{
                         throw new typeException("The type is invalid or has not been defined yet");
@@ -397,8 +433,8 @@ public class Parser{
                     addIdentifier(name,tempType,enclosingFunc);
                 }
                 else if(trimedType.charAt(0)=='['){
-                	String trimedIdentifierName = returnArgsList[0].trim();
-                	checkArray(trimedIdentifierName,trimedType);
+                    String trimedIdentifierName = returnArgsList[0].trim();
+                    checkArray(trimedIdentifierName,trimedType);
                 }
                 else{
                     throw new typeException("The return type is invalid or has not been defined yet");
@@ -436,9 +472,9 @@ public class Parser{
                             addIdentifier(name,tempType,enclosingFunc);
                         }
                         else if(trimedType.charAt(0)=='['){
-	                    	String trimedIdentifierName=returnArgList[0].trim();
-	                    	checkArray(trimedIdentifierName,trimedType);
-	                    }
+                            String trimedIdentifierName=returnArgList[0].trim();
+                            checkArray(trimedIdentifierName,trimedType);
+                        }
                         else{
                             throw new typeException("The return type is invalid or has not been defined yet");
                         }
@@ -476,7 +512,7 @@ public class Parser{
             input+=sc.nextLine()+"\n";
         }
     }
-    static void tokenize(){
+    static void tokenize(Equivalences equivalenceTable){
         //Tokenize the input and strip them of trailing whitespaces and then pass into respective parsers
         String trimedInput=input.trim();
         String lines[]=trimedInput.split("\n");
@@ -484,6 +520,10 @@ public class Parser{
         for(String line: lines){
             String trimedLine=line.trim();
             if(trimedLine.length()<=0){
+                continue;
+            }
+            if(trimedLine.contains(",")){
+                equivalenceTable.internalNameEquivalence(trimedLine);
                 continue;
             }
             String[] parts=trimedLine.split("\\s+");
@@ -510,8 +550,159 @@ public class Parser{
         initTypes();
         inputPrompt();
         getInput();
-        tokenize();
-        
+        Equivalences equivalenceTable = new Equivalences();
+        tokenize(equivalenceTable);
+        equivalenceTable.populate();
     }
 
+}
+class Equivalences{
+    static int internalEquivalenceCount=1;
+    ArrayList<String> primitives = new ArrayList<>();
+    ArrayList<String> structures = new ArrayList<>();
+    ArrayList<String> functions = new ArrayList<>();
+    ArrayList<String> arrays = new ArrayList<>();
+    ArrayList<String> nameEquivalences = new ArrayList<>();
+    ArrayList<String> structuralEquivalence = new ArrayList<>();
+    HashMap<String,ArrayList<String>> internalNameEquivalentMap=new HashMap<>(); 
+    HashMap<String,ArrayList<String>> nameEquivalentPrimitive=new HashMap<>();
+    HashMap<String,ArrayList<String>> nameEquivalentArray=new HashMap<>();
+
+    void nameEquivalence(ArrayList<String> identifiers,int klass){
+        if(klass==DataType.PRIMITIVE){
+            for(String key:identifiers){
+                String dataType=Parser.identifierTable.get(key).dataType.name;
+                if(nameEquivalentPrimitive.containsKey(dataType)==true){
+                    nameEquivalentPrimitive.get(dataType).add(key);
+                }
+                else{
+                    ArrayList<String> temp=new ArrayList<>();
+                    temp.add(key);
+                    nameEquivalentPrimitive.put(dataType,temp);
+                }
+            }
+
+            for(String key:nameEquivalentPrimitive.keySet()){
+                System.out.print(key + ": ");
+                for(String identifier:nameEquivalentPrimitive.get(key)){
+                    System.out.print(identifier+" ");
+                }
+                System.out.println("");
+            }
+        }
+        else if(klass==DataType.ARRAY){
+            for(String key:identifiers){
+                String dataType=Parser.arrayMap.get(key).toString();
+                if(nameEquivalentArray.containsKey(dataType)==true){
+                    nameEquivalentArray.get(dataType).add(key);
+                }
+                else{
+                    ArrayList<String> temp=new ArrayList<>();
+                    temp.add(key);
+                    nameEquivalentArray.put(dataType,temp);
+                }
+
+            }
+
+            for(String key:nameEquivalentArray.keySet()){
+                System.out.print(key + ": ");
+                for(String identifier:nameEquivalentArray.get(key)){
+                    System.out.print(identifier+" ");
+                }
+                System.out.println("");
+            }
+
+        }
+        else{
+            throw new typeException("Invalid type for nameEquivalence");
+        }
+
+    }
+    void structuralEquivalence(ArrayList<String> identifiers,int klass){}
+    void internalNameEquivalence(String line){
+        String[] parts=line.split(",");
+        ArrayList<String> internalNameEquivalence = new ArrayList<>();
+
+        for(int i=0;i<parts.length-1;i++){
+            if(parts[i].contains(":")){
+                throw new typeException("Illegal :");
+            }
+            String[] subParts=parts[i].split("\\s+");
+            if(subParts.length>1){
+                throw new typeException("Identifiers not , separated");
+            }
+            internalNameEquivalence.add(subParts[0]);//Not terminal
+        }
+        if(parts[parts.length-1].contains(":")==false){
+            throw new typeException("No : found");
+        }
+        parts[parts.length-1]=parts[parts.length-1].trim();
+        String subParts[]=parts[parts.length-1].split(":");
+        if(subParts.length!=2){
+            throw new typeException("Too many identifiers or types matched");
+        }
+        internalNameEquivalence.add(subParts[0]);//terminal
+        if(Parser.isPrimitiveType(subParts[1].trim())==true ){
+            internalNameEquivalentMap.put(subParts[1],internalNameEquivalence);
+        }
+        else if(subParts[1].trim().charAt(0)=='['){
+            int count=0;
+            String typeVal=Parser.isArray(subParts[1].trim());
+            String trimedType=subParts[1].trim();
+            while(trimedType.charAt(count)=='['){
+                count++;
+            }
+            internalNameEquivalentMap.put(internalEquivalenceCount+". Array of dimension " + count + " and type is " + typeVal + ":" , internalNameEquivalence);
+        }
+        else{
+            throw new typeException("Invalid type");
+        }
+
+        for(String key: internalNameEquivalentMap.keySet()){
+            System.out.print(key+" ");
+            for(String identifier:internalNameEquivalentMap.get(key)){
+                System.out.print(identifier+" ");
+            }
+            System.out.println("");
+        }
+    }
+
+    void fillPrimitives(String identifierName){
+        primitives.add(identifierName);
+    }
+    void fillStructs(String identifierName){
+        structures.add(identifierName);
+    }
+    void fillFuncs(String identifierName){
+        functions.add(identifierName);
+    }
+    void fillArrays(String identifierName){
+        arrays.add(identifierName);
+    }
+    void printEquivalences(String prompt,ArrayList<String[]> Output){
+        System.out.println(prompt);
+        for(String[] pair : Output){
+            System.out.println(pair[0]+","+pair[1]);
+        }
+    }
+    void populate(){
+        for(String key:Parser.identifierTable.keySet()){
+            if(Parser.identifierTable.get(key).dataType.dataClass==DataType.PRIMITIVE){
+                fillPrimitives(key);
+            }
+            else if(Parser.identifierTable.get(key).dataType.dataClass==DataType.STRUCTURE){
+                fillStructs(key);
+            }
+            else if(Parser.identifierTable.get(key).dataType.dataClass==DataType.ARRAY){
+                fillArrays(key);
+            }
+            else if(Parser.identifierTable.get(key).dataType.dataClass==DataType.FUNCTION){
+                fillFuncs(key);
+            }
+        }
+
+        nameEquivalence(primitives,DataType.PRIMITIVE);
+        nameEquivalence(arrays,DataType.ARRAY);
+        
+    }
 }
