@@ -46,6 +46,20 @@ Note: We do not use `var` at the start.
 
 Donot have multiple variables with the same name, checking for that is not present in this code
 
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ FLOW OF THE PROGRAM @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+1. The input is taken from a file `TestCases.txt` [camel case]
+2. File should start with the word `TESTCASE`
+4. Every test case should be separated by the keyword `TESTCASE`
+5. We parse through every line and determine the class: FUNCTION, STRUCTURE, ARRAY
+6. We then define functions to account for the differnt classes defined within the program
+7. Each function adds an identifier to the identifier table
+8. Each functions arguments to the non-primitive hashMap and the return types to the returnMap
+9. The structures add the embeded types to the non-primitive hashMap
+10. We then run the Equivalnece class to find the internal name equivalence, name equivalence, and structural equivalence
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 *****************************************TEST CASES*****************************************************************************************
 1.
 Input:

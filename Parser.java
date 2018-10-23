@@ -1,10 +1,15 @@
 /***********************************************************************************************************
 *
-* Important point, here the structue reference within the struct declaration will follow the same behavior as
-* an ordinary primitive var identifier:dataType
-* TO DO
-* Remove the else if for handling exceptions
-* Replace the printlns with exceptions
+* This is a program for a swift like parser which currently supports name, structural and internal name
+* equivalence.
+* NOTE: 
+* Implicitly, SWIFT does not support internal name equivalence
+* Here we take an input from the file TestCases.txt and put the output into Output.txt
+* For more information on the syntax refer to README.txt
+* @authors
+* Tanmay Kulkarni 2015B3A70647H
+* Ch Vishal       2015B5A70605H
+*
 *************************************************************************************************************/
 import java.util.*;
 import java.io.*;
@@ -63,7 +68,7 @@ class ArrayProperties{
 }
 
 public class Parser{
-
+    static final int NUMBEROFTESTCASES = 4;
     static String input="";
     static String enclosingStruct="";
     static String enclosingFunc="";
@@ -535,60 +540,55 @@ public class Parser{
         // while(sc.hasNextLine()){
         //     input+=sc.nextLine()+"\n";
         // }
-        FileInputStream f = null;
-        System.out.println(System.getProperty("user.dir")+"/TestCases.txt");
+        String inputFile = "./TestCases.txt";
+        String outputFile = "./Output.txt";
+        int count=0;
+        String testCaseDelim="TESTCASE";
+        String line="";
+        boolean TestCaseStart=false;
         try{
-            f = new FileInputStream(System.getProperty("user.dir")+"/TestCases.txt");
-            DataInputStream d = new DataInputStream(f);
-            BufferedReader bf = new BufferedReader(new InputStreamReader(d));
-            try {
-                String s = bf.readLine();
-                int count = 1;
-                try {
-                    PrintWriter pw = new PrintWriter(System.getProperty("user.dir")+"/Output.txt");
-                    while(count <= 4){
-                        String output = "";
-                        if(count != 4){
-                            s = bf.readLine();
-                            while(s.equals("TESTCASE") == false){
-                                if(s.equals("TESTCASE") == false)
-                                    input += s + "\n";
-                                s = bf.readLine();
-                            }
-                        }
-                        else{
-                            s = bf.readLine();
-                            while(s.equals("END") == false){
-                                if(s.equals("END") == false)
-                                    input += s + "\n";
-                                s = bf.readLine();
-                            }
-                        }
-                        System.out.println(input);
-                        Equivalences equivalenceTable = new Equivalences();
-                        tokenize(equivalenceTable);
-                        equivalenceTable.populate();
-                        output += equivalenceTable.output;
-                        System.out.println(output);
-                        pw.println("TESTCASE "+count);
-                        pw.println(output);
-                        pw.println();
-                        count++;
-                        init();
-                        input = "";
-                    }
-                    pw.close();
+            File fileInput = new File(inputFile);
+            Scanner sc=new Scanner(fileInput);
+            BufferedWriter buffWrite=new BufferedWriter(new FileWriter(outputFile));
+            while(sc.hasNextLine()){
+                line=sc.nextLine();
+                //System.out.println(line);
+                if(line.equals(testCaseDelim) && TestCaseStart==true){
+                    System.out.println("The input is:\n"+input);
+                    String output="";
+                    Equivalences equivalenceTable = new Equivalences();
+                    tokenize(equivalenceTable);
+                    equivalenceTable.populate();
+                    output += equivalenceTable.output;
+                    count++;
+                    buffWrite.write(testCaseDelim+" "+count+"\n");
+                    buffWrite.write(output);
+                    buffWrite.write("\n");
+                    init();
                 }
-                catch (FileNotFoundException ex) {
-                    System.err.println(ex);
+                else if(line.equals(testCaseDelim)){
+                	TestCaseStart=true;
+                }
+                else if(TestCaseStart==true){
+                    input+=line+"\n";
                 }
             }
-            catch (IOException ex) {
-                System.err.println("Line Not Found");
-            }
+            String output="";
+            Equivalences equivalenceTable = new Equivalences();
+            tokenize(equivalenceTable);
+            equivalenceTable.populate();
+            output += equivalenceTable.output;
+            count++;
+            buffWrite.write(testCaseDelim+" "+count+"\n");
+            buffWrite.write(output);
+            buffWrite.write("\n");
+            buffWrite.close();
         }
-        catch(FileNotFoundException ex){
-            System.err.println("File Not Found");
+        catch(FileNotFoundException fex){
+
+        }
+        catch(IOException ioe){
+
         }
     }
     static void tokenize(Equivalences equivalenceTable){

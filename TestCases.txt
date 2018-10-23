@@ -40,4 +40,4 @@ func f2(arg2:t)->(a2:String,b2:Int){}
 TESTCASE
 func f(){}
 func g(){}
-END
+
