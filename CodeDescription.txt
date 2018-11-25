@@ -1,0 +1,172 @@
+Class Description
+
+1. TypeException
+
+	We use it to throw an exception whenever, we encounter an error in the user input
+
+2. DataType
+
+	a. It contains the type of datatypes supported by the program
+	b. Tokens to identify types
+
+3. Identifier
+	
+	Holds an identifier as a indentifier name and the identifier type
+	
+	functions
+		Identify:
+			Given a type token, it tells the datatype being use-
+				a. Primitive
+				b. Struct 
+				c. Funct
+
+4. ArrayProperties
+	
+	a. type of the array
+	b. the number of dimensions
+	
+5. Parser
+	
+	a. enclosingStruct-Holds the structure enclosing an identifier
+	b. enclosingFunc-Holds the function enclosing an identifier
+	c. identifierTable-Holds the identifiername and the corresponding identifier object mapping to it
+	d. typeTable-typetable holds the types available in the program. By default it contains the atomic types 
+				which gets updated as comples types are added.
+	e. nonPrimitiveMap- holds the func args or the types within the struct
+	f. arrayMap - 
+	g. returnMap - holds the function return values.
+	h. structures - a hashset that holds all the structures defined so far
+	i. insideStruct - flag to check if inside struct
+	j. insideFunc - flag to check if inside func
+	k. insideReturn - flag to check if inside return
+	
+	functions
+		initTypes():
+			fills all the default types in the type table.
+		
+		checkArray():
+			It is used to check if the identifier is an array or not.
+				- Adds the identifier to the identifier table, if it has no enclosing body
+				- If inside a function
+					-> If it belongs to the func args, it adds it to the nonPrimitiveMap
+					-> Otherwise, it returns it to the return map.
+				-If  inside a struct
+					-> Adds it to the nonPrimitiveMap of struct
+					
+			We add all the arrays within the arraymap, so as to account for all the properties of an array, 
+			such, as the type and the numbeer of dimensions.
+					
+		isArray():
+			check if is a valid array and return the type of the  array.
+		
+		addIdentifier(name,type):
+			We have the following functionality
+				- 	insideStruct
+					If it is inside a structure we create a new type corresponding to that struct.
+					It will create an entry in the nonprimitive map for storing enclosed  types
+					It will add it to the structures hashset for comparision in the typeequivalence.
+				-  insideFunc
+					create a new entry for the return map
+					create an entry for the arguments in the nonprimtive map
+
+				= Regardsless of conditions it will be added to the identifier table.
+			
+		addIdentifier(name,type,nonPrimitiveIdentifier):
+			It checks if it is enclosed in a non-primitive type.
+			It updates the arraylist of identifiers corresponding to that complex type.
+			
+		addReturnType():
+			adds the return type to the returnMap.
+			
+		parsePrimitive():
+			-> If it is not in an enclosing struct, it adds it to the identifier table.
+			-> It is added to the non-primitive map, if it is inside an enclosing struct.
+			-> If there is a '[' it calls checkarray
+			
+		parseStruct():
+			-> We do not allow struct inside struct. 
+			-> We do not allow struct inside func
+			-> Then it adds the identiifer to the identifier table.
+			
+		parseFunc():
+			-> We do not allow functions in structures.
+			-> We do not allow functions in functions.
+			-> Then it adds it to the identifier table.
+			-> It adds the arguments within the function to the non-primitive map.
+			-> It adds the return types to the returnMap.
+			
+		isPrimitiveType():
+			It return true, if we can find the type in the identifier table.
+			IMPORTANT: structures are added to the typetable after definition. Effectively, making them primitive types.
+			
+		inputPrompt():
+			Gives the user the promt to give an input.
+			
+		init():
+			Reinitialize all variables for all test cases.
+			
+		getInput():
+			Obtain the input from user/file.
+			
+		tokenize():
+			Tokenize the input and strip them of whitespaces and pass them into respective parser.
+			#### Hack #### It handles internal name equivalences.
+			
+		main():
+			initTypes
+			inputPrompt
+			getinput
+			
+6. Equivalences
+		a. internalNameEquivalenceCount
+		b. primitives
+		c. structures
+		d. functions
+		e. arrays
+		f. nameEquivalences
+		g. structuralEquivalences
+		h. internalNameEquivalentMap
+		i. nameEquivalentPrimitive
+		j. nameEquivalentArray
+		h. truths
+		i. output
+		
+		functions
+			
+			nameEquivalence():
+				Iterative through the list of identifiers.
+					-> Finds if it is a primitve.
+					-> Check if the nameEquivalentPrimitive hashmap contains the datatype of this identifier in the list.
+					-> if this holds, we add it to the arraylist containing the name equivalent types.
+					-> Make a new entry in the map.
+					
+				We then print the above map.
+				
+				We do a similar process to account for arrays, this is because, we have not explicitly added them to the TypeTable.
+				In addition, we only compare the properties of the  two arrays to  decide if they are name equivalent or not.
+				
+			compare():
+				We process both structures and function arguments here.
+				We check if the corresponding elements are of the same type.
+					-> If not we return false.
+					-> If all match we return true.
+					
+			compareReturns():
+					It is the same as the previous, but it works for return types. Due, to the fact that we make use of returnMap
+					
+			
+			structuralEquivalence():
+				We first check if we have to process functions to structures.
+				If it is a structure, we make use of Myhill-Nerode Theorem to find if they are the same.
+				
+			internalNameEquivalence():
+				If it is on the same line, we consider them to be internally equivalent.
+				
+			populate():
+				It iterates through the keys of IdentifierTable and sepparates them as primitives, structs, functs and arrays.
+				
+				It calls the functions required to compute all the equivalences. It calls the function to print the internal name equivalences.
+				
+			printInternalNameEquivalences():
+				It prints those variables which are internally name equivalent.
+				
