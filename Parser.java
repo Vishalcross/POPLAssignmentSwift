@@ -68,14 +68,12 @@ class ArrayProperties{
 }
 
 public class Parser{
-    static final int NUMBEROFTESTCASES = 4;
     static String input="";
     static String enclosingStruct="";
     static String enclosingFunc="";
     static HashMap<String,Identifier> identifierTable = new HashMap<>();
     static HashMap<String,DataType> typeTable = new HashMap<>();
     static HashMap<String,ArrayList<String>> nonPrimitiveMap = new HashMap<>();
-    static HashMap<String,DataType> functionArgumentsMap = new HashMap<>();
     static HashMap<String,ArrayProperties> arrayMap = new HashMap<>();
     static HashMap<String,ArrayList<String>> returnMap = new HashMap<>();
     static HashSet<String> structures = new HashSet<>();
@@ -517,13 +515,12 @@ public class Parser{
         System.out.println("Enter the input and press EOF(^D) to exit:");
     }
     static void init(){
-         input="";
-         enclosingStruct="";
-          enclosingFunc="";
-         identifierTable = new HashMap<>();
-         typeTable = new HashMap<>();
-         nonPrimitiveMap = new HashMap<>();
-        functionArgumentsMap = new HashMap<>();
+        input="";
+        enclosingStruct="";
+        enclosingFunc="";
+        identifierTable = new HashMap<>();
+        typeTable = new HashMap<>();
+        nonPrimitiveMap = new HashMap<>();
         arrayMap = new HashMap<>();
         returnMap = new HashMap<>();
         structures = new HashSet<>();
@@ -935,7 +932,8 @@ class Equivalences{
         }
         internalNameEquivalence.add(subParts[0]);//terminal
         if(Parser.isPrimitiveType(subParts[1].trim())==true ){
-            internalNameEquivalentMap.put(subParts[1],internalNameEquivalence);
+            internalNameEquivalentMap.put(internalEquivalenceCount+". "+subParts[1],internalNameEquivalence);
+            internalEquivalenceCount++;
         }
         else if(subParts[1].trim().charAt(0)=='['){
             int count=0;
@@ -945,23 +943,14 @@ class Equivalences{
                 count++;
             }
             internalNameEquivalentMap.put(internalEquivalenceCount+". Array of dimension " + count + " and type is " + typeVal + ":" , internalNameEquivalence);
+            internalEquivalenceCount++;
         }
         else{
             throw new typeException("Invalid type");
         }
 
         // System.out.println("@@@@@@@@@@@@@@@@@@ INTERNAL NAME EQ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        output += "@@@@@@@@@@@@@@@@@@ INTERNAL NAME EQ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
-        for(String key: internalNameEquivalentMap.keySet()){
-            // System.out.print(key+" ");
-            output += key+" ";
-            for(String identifier:internalNameEquivalentMap.get(key)){
-                // System.out.print(identifier+" ");
-                output += identifier + " ";
-            }
-            // System.out.println("");
-            output += "\n";
-        }
+
     }
 
     void fillPrimitives(String identifierName){
@@ -1002,5 +991,19 @@ class Equivalences{
         nameEquivalence(arrays,DataType.ARRAY);
         structuralEquivalence(structures,DataType.STRUCTURE);
         structuralEquivalence(functions,DataType.FUNCTION);
+        printInernalQuivalence();
+    }
+    void printInernalQuivalence(){
+        output += "@@@@@@@@@@@@@@@@@@ INTERNAL NAME EQ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
+        for(String key: internalNameEquivalentMap.keySet()){
+            // System.out.print(key+" ");
+            output += key+" ";
+            for(String identifier:internalNameEquivalentMap.get(key)){
+                // System.out.print(identifier+" ");
+                output += identifier + " ";
+            }
+            // System.out.println("");
+            output += "\n";
+        }
     }
 }

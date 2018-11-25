@@ -14,6 +14,7 @@ struct t{
 TESTCASE
 var a: [[Int]]
 b,c,d: [[Float]]
+x,y,z: String
 struct s{
 	var p:String
 	var e:[[Float]]
