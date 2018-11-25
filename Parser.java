@@ -2,7 +2,7 @@
 *
 * This is a program for a swift like parser which currently supports name, structural and internal name
 * equivalence.
-* NOTE: 
+* NOTE:
 * Implicitly, SWIFT does not support internal name equivalence
 * Here we take an input from the file TestCases.txt and put the output into Output.txt
 * For more information on the syntax refer to README.txt
@@ -76,7 +76,6 @@ public class Parser{
     static HashMap<String,DataType> typeTable = new HashMap<>();
     static HashMap<String,ArrayList<String>> nonPrimitiveMap = new HashMap<>();
     static HashMap<String,DataType> functionArgumentsMap = new HashMap<>();
-    static HashMap<String,DataType> functionReturnsMap = new HashMap<>();
     static HashMap<String,ArrayProperties> arrayMap = new HashMap<>();
     static HashMap<String,ArrayList<String>> returnMap = new HashMap<>();
     static HashSet<String> structures = new HashSet<>();
@@ -525,7 +524,6 @@ public class Parser{
          typeTable = new HashMap<>();
          nonPrimitiveMap = new HashMap<>();
         functionArgumentsMap = new HashMap<>();
-        functionReturnsMap = new HashMap<>();
         arrayMap = new HashMap<>();
         returnMap = new HashMap<>();
         structures = new HashSet<>();
